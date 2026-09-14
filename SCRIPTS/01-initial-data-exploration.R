@@ -4,6 +4,7 @@
 
 
 # Arquivo existe?
+
 file.exists("/home/oraculo/Documentos/UEPB_2026jun28/CLEANDERSON/SURVIVAL/SURVIVAL_PROJECTS/CANCER_PROJECT/DATA/cancer-minas-gerais.csv")
 
 # Detectando a codificação correta
@@ -104,7 +105,37 @@ table(dados_ovario$`Data do Óbito`=="",useNA = "ifany")
 # Data de último contato
 table(dados_ovario$`Data de Último Contato`=="",useNA="ifany")
 
+# Tabela Status Vital e Data do óbito
+table(
+  dados_ovario$`Status Vital`,
+  dados_ovario$`Data do Óbito`=="",
+  #A data do óbito é igual a vazio? TRUE=vazio
+  useNA = "ifany"
+)
 
+# Tabela de Status Vital e Data do Último Contato
+table(
+  dados_ovario$`Status Vital`,
+  dados_ovario$`Data de Último Contato`=="",
+  #A data do último contato é igual a vazio? TRUE=vazio
+  useNA="ifany"
+)
 
+# Quando não existe o último contato, existe óbito?
+# Data de Último Contato x Data do Obito
+table(
+  dados_ovario$`Data de Último Contato`=="",
+  dados_ovario$`Data do Óbito`=="",
+  #A data do óbito é igua a vazio? TRUE=vazio
+  useNA = "ifany"
+)
 
-
+# Status Vital x Último Contato x Óbito
+table(
+  dados_ovario$`Status Vital`,
+  dados_ovario$`Data de Último Contato`=="",
+  #A data do último contato é igual a vazio?
+  dados_ovario$`Data do Óbito`=="",
+  #A data do óbito é igual a vazio?
+  useNA="ifany"
+)

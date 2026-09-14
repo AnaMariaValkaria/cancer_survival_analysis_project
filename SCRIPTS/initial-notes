@@ -79,3 +79,80 @@ FALSE  TRUE
 1.392 com data de último contato;
 1.081 sem data de último contato.
 
+
+> # Tabela Status Vital e Data do óbito
+> table(
++   dados_ovario$`Status Vital`,
++   dados_ovario$`Data do Óbito`=="",
++   #A data do óbito é igual a vazio? TRUE=vazio
++   useNA = "ifany"
++ )
+
+                 FALSE TRUE
+                   579  338
+  MORTO            761    0
+  SEM INFORMAÇÃO    72  212
+  VIVO               6  505
+
+
+- Em VIVO temos 505 registros sem data de óbito. E 6 com data de óbito????
+- Em SEM INFORMAÇÃO temos 212 pacientes sem data ed óbito. E 72 com data de óbito???
+- Em MORTES temos 0 sem data de óbito e 761 com data de óbito. Todos os mortos estão com suas datas.
+- Em BRANCO temos 338 sem data de óbito. E 579 com data de óbito? Então porque está em branco o Status Vital?
+
+O que significa o branco em Status Vital? Já que os registros sem informação estão como 'SEM INFORMAÇÃO'! O sem informação é perda de contato? Como pode ser perda de contato se alguns tem data de óbito? Então, desistiram do tratamento?????
+
+IR ATRÁS DA DOCUMENTAÇÃO.
+
+
+> # Tabela de Status Vital e Data do Último Contato
+> table(
++   dados_ovario$`Status Vital`,
++   dados_ovario$`Data de Último Contato`=="",
++   #A data do último contato é igual a vazio? TRUE=vazio
++   useNA="ifany"
++ )
+
+                 FALSE TRUE
+                     0  917
+  MORTO            727   34
+  SEM INFORMAÇÃO   158  126
+  VIVO             507    4
+
+- Os em BRANCO todos não tem último contato. Já sabemos o que são os BRANCO, perda de contato.
+- Os de MORTE tem 34 casos de perda de contato. Então como sabe a morte?
+- Os SEM INFORMAÇÃO temos 126 de perda do último contato. E 158 não.
+- Do VIVO só 4 perdas do último contato.
+
+
+> # Quando não existe o último contato, existe óbito?
+> # Data de Último Contato x Data do Obito
+> table(
++   dados_ovario$`Data de Último Contato`=="",
++   dados_ovario$`Data do Óbito`=="",
++   #A data do óbito é igua a vazio? TRUE=vazio
++   useNA = "ifany"
++ )
+
+        FALSE TRUE
+  FALSE   746  646
+  TRUE    672  409
+
+1. 746
+Tem data de último contato + data de óbito.
+São registros em que temos as duas informações.
+
+2. 646
+Tem data de último contato, mas não tem data de óbito.
+Aqui existe uma informação de acompanhamento, mas não há data de óbito registrada.
+
+3. 672
+Não tem data de último contato, mas tem data de óbito.
+Aqui está a resposta para aquela sua pergunta anterior:
+“Como sabe que morreu se não tem último contato?”
+Porque existe data de óbito. O último contato não precisa necessariamente estar preenchido para existir um registro de óbito.
+
+4. 409
+Não tem data de último contato nem data de óbito.
+
+Esse é o grupo que merece nossa maior atenção.
