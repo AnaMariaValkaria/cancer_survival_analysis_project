@@ -139,3 +139,77 @@ table(
   #A data do óbito é igual a vazio?
   useNA="ifany"
 )
+
+
+# Será que existe problemas cronológicos?
+# Como data de óbito anterior à data de diagnóstico!
+# Criando cópia das datas para analizar.
+
+# Só vizualiza, não cria os objetos.
+View(data.frame(
+  diagnostico    = as.Date(dados_ovario$`Data de Diagnostico`, format = "%d/%m/%Y"),
+  obito          = as.Date(dados_ovario$`Data do Óbito`, format = "%d/%m/%Y"),
+  ultimo_contato = as.Date(dados_ovario$`Data de Último Contato`, format = "%d/%m/%Y")
+))
+
+# Criando 3 novas colunas em dados_ovário
+# Precisa criar os objetos para fazer o sum!
+dados_ovario$data_diagnostico <- as.Date(
+  dados_ovario$`Data de Diagnostico`,
+  format = "%d/%m/%Y"
+)
+
+dados_ovario$data_obito <- as.Date(
+  dados_ovario$`Data do Óbito`,
+  format = "%d/%m/%Y"
+)
+
+dados_ovario$data_ultimo_contato <- as.Date(
+  dados_ovario$`Data de Último Contato`,
+  format = "%d/%m/%Y"
+)
+
+# Conferindo os 20 primeiros dados
+head(
+  dados_ovario[, c(
+    'data_diagnostico',
+    'data_obito',
+    'data_ultimo_contato'
+  )],20
+)
+
+
+# Existe data de diagnóstico?
+sum(!is.na(dados_ovario$data_diagnostico))
+# Não existe data de diagnóstico?
+sum(is.na(dados_ovario$data_diagnostico))
+
+# Existe data de óbito?
+sum(!is.na(dados_ovario$data_obito))
+# Não existe data de óbito?
+sum(is.na(dados_ovario$data_obito))
+
+# Existe data de último contato?
+sum(!is.na(dados_ovario$data_ultimo_contato))
+#Não existe data de último contato?
+sum(is.na(dados_ovario$data_ultimo_contato))
+
+
+# Pegando os sum e colocando tudo em uma tabela
+data.frame(
+  variavel=c(
+    'data_diagnostico',
+    'data_de_obito',
+    'data_de_ultimo_contato'
+  ),
+  preenchidas=c(
+    sum(!is.na(dados_ovario$data_diagnostico)),
+    sum(!is.na(dados_ovario$data_obito)),
+    sum(!is.na(dados_ovario$data_ultimo_contato))
+  ),
+  ausentes=c(
+    sum(is.na(dados_ovario$data_diagnostico)),
+    sum(is.na(dados_ovario$data_obito)),
+    sum(is.na(dados_ovario$data_ultimo_contato))
+  )
+)
