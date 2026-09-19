@@ -213,3 +213,403 @@ data.frame(
     sum(is.na(dados_ovario$data_ultimo_contato))
   )
 )
+
+
+# Verificando se não há nenhum óbito anterior ao diagnóstico
+# Comparação entre data de diagnóstico e data de óbito
+sum(
+  dados_ovario$data_obito > dados_ovario$data_diagnostico,
+  na.rm = TRUE  #Ignora os valores ausentes!
+) #Datas de óbito > Datas do Diagnóstico
+
+sum(
+  dados_ovario$data_obito == dados_ovario$data_diagnostico,
+  na.rm = TRUE
+) #Datas do óbito == Datas do Diagnóstico
+
+sum(
+  dados_ovario$data_obito < dados_ovario$data_diagnostico,
+  na.rm = TRUE
+) #Datas do óbito < Datas do Diagnóstico
+
+
+# Existe algum paciente se o último contato foi registrado antes do diagnóstico?
+# Comparação entre data do diagnóstico e a data do último contato
+sum(
+  dados_ovario$data_ultimo_contato<dados_ovario$data_diagnostico,
+  na.rm = TRUE
+) #Datas do último contato < datas do diagnóstico
+
+sum(
+  dados_ovario$data_ultimo_contato==dados_ovario$data_diagnostico,
+  na.rm = TRUE
+) #Datas do último contato == datas do diagnóstico
+
+sum(
+  dados_ovario$data_ultimo_contato>dados_ovario$data_diagnostico,
+  na.rm = TRUE
+) #Datas do último contato > datas do diagnóstico
+
+
+# Vizualizando os 21 casos de data de último contato < data do diagnóstico
+# Salvando numa variável para exportar
+inconsistencias <- dados_ovario[
+  !is.na(dados_ovario$data_ultimo_contato) &
+  dados_ovario$data_ultimo_contato < dados_ovario$data_diagnostico,
+  c(
+    "Código do Paciente",
+    "Nome do RCBP",
+    "Status Vital",
+    "data_diagnostico",
+    "data_ultimo_contato",
+    "data_obito"
+  )
+]
+
+# Vendo se tá tudo certo:
+View(inconsistencias)
+nrow(inconsistencias)
+colSums(is.na(inconsistencias))
+
+# Exportando...
+write.csv2(inconsistencias,"inconsistencias_ovario.csv",row.names = FALSE)
+
+inconsistencias$dias_diagnostico_ultimo_contato <-
+  as.numeric(
+    inconsistencias$data_ultimo_contato -
+      inconsistencias$data_diagnostico
+  )
+inconsistencias[, c(
+  "Código do Paciente",
+  "data_diagnostico",
+  "data_ultimo_contato",
+  "dias_diagnostico_ultimo_contato",
+  "data_obito"
+)]
+
+# Quantos dos 21 casos tem data de óbito?
+table(
+  is.na(inconsistencias$data_obito)
+)  #A data do óito é vazio? SIM=TRUE
+
+
+# Analizando os 9 casos com data de óbito dos 21 casos anteriores
+inconsistencias[
+  !is.na(inconsistencias$data_obito),
+  c(
+    "Código do Paciente",
+    "Nome do RCBP",
+    "Status Vital",
+    "data_diagnostico",
+    "data_ultimo_contato",
+    "data_obito"
+  )
+]
+
+inconsistencias$dias_diagnostico_obito <-
+  as.numeric(
+    inconsistencias$data_obito -
+      inconsistencias$data_diagnostico
+  )
+inconsistencias[
+  !is.na(inconsistencias$data_obito),
+  c(
+    "Código do Paciente",
+    "data_diagnostico",
+    "data_obito",
+    "dias_diagnostico_obito"
+  )
+]
+
+
+# Investigando os 12 pacientes que não possuem data de óbito dos 21 casos anteriores
+inconsistencias[
+  is.na(inconsistencias$data_obito),
+  c(
+    "Código do Paciente",
+    "Nome do RCBP",
+    "Status Vital",
+    "data_diagnostico",
+    "data_ultimo_contato",
+    "data_obito"
+  )
+]
+
+table(
+  inconsistencias[
+    is.na(inconsistencias$data_obito),
+    "Status Vital"
+  ],
+  useNA = "ifany"
+)
+inconsistencias[
+  is.na(inconsistencias$data_obito) &
+    inconsistencias$`Status Vital` == "VIVO",
+  c(
+    "Código do Paciente",
+    "Status Vital",
+    "data_diagnostico",
+    "data_ultimo_contato"
+  )
+]
+
+inconsistencias[
+  is.na(inconsistencias$data_obito) &
+    inconsistencias$`Status Vital` == "SEM INFORMAÇÃO",
+  c(
+    "Código do Paciente",
+    "Status Vital",
+    "data_diagnostico",
+    "data_ultimo_contato"
+  )
+]
+
+
+# Procurando datas ausentes em data_diagnostico
+sum(is.na(dados_ovario$data_diagnostico))
+
+# Procurando data de óbito antes da data do diagnóstico
+sum(
+  dados_ovario$data_obito<dados_ovario$data_diagnostico,
+  na.rm = TRUE
+)
+
+# Procurando por óbito no mesmo dia do diagnóstico
+sum(
+  dados_ovario$data_obito==dados_ovario$data_diagnostico,
+  na.rm = TRUE
+)
+
+# Procurando por data de óbito depois da data do diagnóstico
+sum(
+  dados_ovario$data_obito>dados_ovario$data_diagnostico,
+  na.rm = TRUE
+)
+
+# Último contato posterior ao diagnóstico
+sum(
+  dados_ovario$data_ultimo_contato >
+    dados_ovario$data_diagnostico,
+  na.rm = TRUE
+)
+
+# Óbito anterior ao último contato
+sum(
+  dados_ovario$data_obito<dados_ovario$data_ultimo_contato,
+  na.rm = TRUE
+)
+
+inconsistencia2<-dados_ovario[
+  !is.na(dados_ovario$data_obito) &
+    !is.na(dados_ovario$data_ultimo_contato) &
+    dados_ovario$data_obito < dados_ovario$data_ultimo_contato,
+  c(
+    "Código do Paciente",
+    "Status Vital",
+    "data_diagnostico",
+    "data_obito",
+    "data_ultimo_contato",
+    "Tipo do Obito"
+  )
+];inconsistencia2
+
+
+# Auditoria sa relação data de óbito e data do último contato
+# 1. Óbito antes do último contato
+obito_antes_contato <- sum(
+  !is.na(dados_ovario$data_obito) &
+    !is.na(dados_ovario$data_ultimo_contato) &
+    dados_ovario$data_obito < dados_ovario$data_ultimo_contato
+)
+
+# 2. Óbito na mesma data do último contato
+obito_igual_contato <- sum(
+  !is.na(dados_ovario$data_obito) &
+    !is.na(dados_ovario$data_ultimo_contato) &
+    dados_ovario$data_obito == dados_ovario$data_ultimo_contato
+)
+
+# 3. Óbito depois do último contato
+obito_depois_contato <- sum(
+  !is.na(dados_ovario$data_obito) &
+    !is.na(dados_ovario$data_ultimo_contato) &
+    dados_ovario$data_obito > dados_ovario$data_ultimo_contato
+)
+
+# 4. Óbito e último contato ambos preenchidos
+ambas_datas <- sum(
+  !is.na(dados_ovario$data_obito) &
+    !is.na(dados_ovario$data_ultimo_contato)
+)
+
+# 5. Mostrar os resultados
+data.frame(
+  relacao = c(
+    "Óbito antes do último contato",
+    "Óbito igual ao último contato",
+    "Óbito depois do último contato",
+    "Óbito e último contato preenchidos"
+  ),
+  n = c(
+    obito_antes_contato,
+    obito_igual_contato,
+    obito_depois_contato,
+    ambas_datas
+  )
+)
+
+
+# DIFERENÇA EM DIAS ENTRE ÓBITO E ÚLTIMO CONTATO
+dif_obito_contato <- as.numeric(
+  dados_ovario$data_ultimo_contato -
+    dados_ovario$data_obito
+)
+
+summary(
+  dif_obito_contato[
+    !is.na(dados_ovario$data_obito) &
+      !is.na(dados_ovario$data_ultimo_contato)
+  ]
+)
+
+# CASOS EM QUE ÚLTIMO CONTATO É POSTERIOR AO ÓBITO
+dados_ovario[
+  !is.na(dados_ovario$data_obito) &
+    !is.na(dados_ovario$data_ultimo_contato) &
+    dados_ovario$data_ultimo_contato >
+    dados_ovario$data_obito,
+  c(
+    "Código do Paciente",
+    "Nome do RCBP",
+    "Status Vital",
+    "data_diagnostico",
+    "data_obito",
+    "data_ultimo_contato",
+    "Tipo do Obito"
+  )
+]
+
+# ============================================================
+# INVESTIGAÇÃO DOS 66 CASOS:
+# ÚLTIMO CONTATO ANTERIOR AO ÓBITO
+# ============================================================
+
+# 1. Criar a diferença em dias:
+# positivo = último contato depois do óbito
+# zero     = mesma data
+# negativo = último contato antes do óbito
+
+dif_obito_contato <- as.numeric(
+  dados_ovario$data_ultimo_contato -
+    dados_ovario$data_obito
+)
+
+# ------------------------------------------------------------
+# 2. Resumo apenas dos 66 casos
+# ------------------------------------------------------------
+
+summary(
+  dif_obito_contato[
+    !is.na(dados_ovario$data_obito) &
+      !is.na(dados_ovario$data_ultimo_contato) &
+      dif_obito_contato < 0
+  ]
+)
+
+# ------------------------------------------------------------
+# 3. Quantos casos existem para cada intervalo de tempo?
+# ------------------------------------------------------------
+
+table(
+  dif_obito_contato[
+    !is.na(dados_ovario$data_obito) &
+      !is.na(dados_ovario$data_ultimo_contato) &
+      dif_obito_contato < 0
+  ]
+)
+
+# ------------------------------------------------------------
+# 4. Mostrar os 66 casos completos
+# ------------------------------------------------------------
+
+inconsistencias3 <- dados_ovario[
+  !is.na(dados_ovario$data_obito) &
+    !is.na(dados_ovario$data_ultimo_contato) &
+    dif_obito_contato < 0,
+  c(
+    "Código do Paciente",
+    "Nome do RCBP",
+    "Status Vital",
+    "data_diagnostico",
+    "data_obito",
+    "data_ultimo_contato",
+    "Tipo do Obito"
+  )
+]
+
+inconsistencias3$dias_contato_antes_obito <-
+  as.numeric(
+    inconsistencias3$data_ultimo_contato -
+      inconsistencias3$data_obito
+  )
+
+inconsistencias3
+
+# ============================================================
+# STATUS VITAL DOS 66 CASOS
+# EM QUE O ÚLTIMO CONTATO OCORREU ANTES DO ÓBITO
+# ============================================================
+
+table(
+  dados_ovario$`Status Vital`[
+    !is.na(dados_ovario$data_obito) &
+      !is.na(dados_ovario$data_ultimo_contato) &
+      dados_ovario$data_ultimo_contato <
+      dados_ovario$data_obito
+  ],
+  useNA = "ifany"
+)
+
+# ============================================================
+# QUANTOS DOS 66 TAMBÉM ESTÃO ENTRE OS 21 CASOS
+# COM ÚLTIMO CONTATO ANTERIOR AO DIAGNÓSTICO?
+# ============================================================
+
+sum(
+  !is.na(dados_ovario$data_obito) &
+    !is.na(dados_ovario$data_ultimo_contato) &
+    dados_ovario$data_ultimo_contato <
+    dados_ovario$data_diagnostico
+)
+
+dados_ovario[
+  dados_ovario$`Código do Paciente` %in%
+    inconsistencia2$`Código do Paciente`,
+]
+
+table(
+  format(
+    inconsistencias$data_diagnostico,
+    "%Y"
+  )
+)
+
+table(
+  format(
+    inconsistencia2$data_diagnostico,
+    "%Y"
+  )
+)
+
+
+# Auditoria para verificar a disponibilidade de se criar o vetor censura
+# Status x Data de óbito e último contato
+with(
+  dados_ovario,
+  table(
+    `Status Vital`,
+    !is.na(data_obito),
+    !is.na(data_ultimo_contato)
+  )
+)
+
